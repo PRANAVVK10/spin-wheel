@@ -10,16 +10,19 @@
 <script>
   import SpinComponent from "$lib/SpinComponent.svelte";
 
-  import { slices, currentIndex, flag } from "$lib/store";
+  import {
+    slices,
+    currentIndex,
+    flag,
+    colors,
+    numberOfSlices,
+  } from "$lib/store";
 
   import { onMount } from "svelte";
 
   import { get } from "$lib/api";
 
   //global variables
-  const numberOfSlices = 1;
-
-  const colors = ["red", "blue", "pink", "green", "purple"];
 
   $currentIndex = -1;
 
@@ -33,8 +36,8 @@
   let currentName;
 
   onMount(async () => {
-    for (let i = 0; i <= numberOfSlices; i++) {
-      $slices[i] = { key: i, label: "", id: "", color: colors[i] };
+    for (let i = 0; i <= $numberOfSlices; i++) {
+      $slices[i] = { key: i, label: "", id: "", color: $colors[i] };
     }
 
     // get spin
@@ -57,8 +60,7 @@
       currentName = tags["display-name"];
 
       if ($flag == true) {
-        if ($currentIndex < numberOfSlices) {
-          console.log("currentIndex < numberOfSlices");
+        if ($currentIndex < $numberOfSlices) {
           if (Object.values($slices).some(exists)) {
             console.log("Duplicate Found");
           } else {
@@ -67,14 +69,11 @@
               key: 0,
               label: currentName,
               id: currentId,
-              color: colors[$currentIndex],
+              color: $colors[$currentIndex],
             };
           }
         } else {
           $currentIndex = -1;
-          // Object.values($slices).forEach((item, i) => {
-          //   $slices[i] = { key: i, label: "", id: "", color: colors[i] };
-          // });
         }
       }
     });

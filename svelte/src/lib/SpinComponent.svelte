@@ -1,27 +1,26 @@
 <script>
-  import { afterUpdate, onMount } from "svelte";
-  import { slices, currentIndex, flag } from "$lib/store";
+  import { afterUpdate } from "svelte";
+
+  import {
+    slices,
+    currentIndex,
+    flag,
+    colors,
+    numberOfSlices,
+  } from "$lib/store";
 
   import { get } from "$lib/api";
 
   $: data = Object.values($slices);
 
-  $: console.log({ key: data });
-
-  // console.log({ key1: data.key[0] });
-
+  //global variables
   let newChart;
   let toReplaceElement;
   export let streamerId;
   let winnerWindow;
   let winnerWindowLabel;
 
-  onMount(() => {
-    console.log("onmount...");
-  });
-
   afterUpdate(() => {
-    console.log("daadas");
     var padding = { top: 20, right: 40, bottom: 0, left: 0 },
       w = 500 - padding.left - padding.right,
       h = 500 - padding.top - padding.bottom,
@@ -33,6 +32,7 @@
     // color = d3.scale.category20();
     //category20c()
 
+    //spin div
     const newNode = document.createElement("div");
 
     var svg = d3
@@ -79,7 +79,8 @@
       .attr("d", function (d) {
         return arc(d);
       });
-    // add the text
+
+    // add text
 
     arcs
       .append("text")
@@ -96,14 +97,14 @@
         );
       })
       .attr("text-anchor", "end")
-      .style({ fill: "" })
+      .style({ fill: "", "font-weight": "bold", "font-size": "16px" })
       .text(function (d, i) {
         return data[i].label;
       });
 
     // container.on("click", spin);
 
-    container.on("click", null);
+    // container.on("click", null);
 
     if (data.length == 2 && $slices[1].key == 0) {
       $flag = false;
@@ -152,19 +153,15 @@
             );
 
             console.log({ profile });
-            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="300" height="300"/>`;
+            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="200" height="200"/>`;
             winnerWindowLabel.innerHTML = `<h1>${data[picked].label} wins the game</h1>`;
 
             oldrotation = rotation;
             /* Get the result value from object "data" */
             // console.log(data[picked].value);
 
-            const numberOfSlices = 1;
-
-            const colors = ["red", "blue", "pink", "green", "purple"];
-
-            for (let i = 0; i <= numberOfSlices; i++) {
-              $slices[i] = { key: i, label: "", id: "", color: colors[i] };
+            for (let i = 0; i <= $numberOfSlices; i++) {
+              $slices[i] = { key: i, label: "", id: "", color: $colors[i] };
             }
             $currentIndex = -1;
             $flag = true;
@@ -209,7 +206,7 @@
     }
 
     newChart.innerHTML = "";
-    console.log("Afterippp");
+
     newChart.appendChild(newNode);
   });
 </script>
@@ -251,7 +248,7 @@
     transform: translate(0, -50%);
   }
   #winnerImage {
-    margin-left: 30px;
+    margin-left: 100px;
     margin-top: 20px;
   }
 </style>

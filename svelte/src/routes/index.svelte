@@ -9,10 +9,8 @@
   };
 </script>
 
-<div
-  class="h-screen lg:mr-96 lg:ml-96 mr-40 ml-40 flex flex-col justify-center"
->
-  <input
+<div class="h-screen flex justify-between">
+  <!-- <input
     class="mb-10 h-10 rounded-md pl-2 shadow-md outline-none"
     type="text"
     placeholder="UserName"
@@ -21,13 +19,13 @@
     class="mb-10 h-10 rounded-md pl-2 shadow-md outline-none"
     type="text"
     placeholder="Password"
-  />
+  /> -->
   <button
-    class="mb-10 rounded bg-blue-500 text-white p-3 shadow-lg"
+    class=" rounded bg-blue-500 text-white p-3 shadow-lg w-60"
     on:click={signInHandler}>sign in with twitch</button
   >
   <button
-    class=" rounded bg-blue-500 text-white p-3 shadow-lg"
+    class=" rounded bg-blue-500 text-white p-3 shadow-lg w-60"
     on:click={loginWithGoogle}>sign in with google</button
   >
 </div>
