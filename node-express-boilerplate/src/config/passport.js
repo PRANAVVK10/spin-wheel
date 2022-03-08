@@ -63,7 +63,7 @@ const twitchStrategy = new TwitchStrategy(
 
   async function (accessToken, refreshToken, profile, done) {
     console.log({ accessToken, refreshToken, profile });
-    return done(null, { accessToken, refreshToken, profile });
+    return done(null, {twitch:{ accessToken, refreshToken, profile }});
   }
 );
 

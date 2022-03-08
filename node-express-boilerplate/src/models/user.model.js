@@ -8,7 +8,7 @@ const twitchSchema = mongoose.Schema({
 
   accessToken:{
     type: String,
-    private:true,
+    // private:true,
   },
 
   profile:{

@@ -1,12 +1,27 @@
 <script>
   import { afterUpdate, onMount } from "svelte";
-  import { chatName, chats, getChats, viewersArray, viewers } from "$lib/store";
+  import { slices, currentIndex, flag } from "$lib/store";
 
-  $: data = $chats;
+  import { get } from "$lib/api";
+
+  $: data = Object.values($slices);
+
+  $: console.log({ key: data });
+
+  // console.log({ key1: data.key[0] });
+
   let newChart;
   let toReplaceElement;
+  export let streamerId;
+  let winnerWindow;
+  let winnerWindowLabel;
+
+  onMount(() => {
+    console.log("onmount...");
+  });
 
   afterUpdate(() => {
+    console.log("daadas");
     var padding = { top: 20, right: 40, bottom: 0, left: 0 },
       w = 500 - padding.left - padding.right,
       h = 500 - padding.top - padding.bottom,
@@ -14,8 +29,8 @@
       rotation = 0,
       oldrotation = 0,
       picked = 100000,
-      oldpick = [],
-      color = d3.scale.category20();
+      oldpick = [];
+    // color = d3.scale.category20();
     //category20c()
 
     const newNode = document.createElement("div");
@@ -59,8 +74,6 @@
     arcs
       .append("path")
       .attr("fill", function (d, i) {
-        console.log("color");
-        console.log({ d, i });
         return d.data.color;
       })
       .attr("d", function (d) {
@@ -92,7 +105,8 @@
 
     container.on("click", null);
 
-    if (data.length == 2) {
+    if (data.length == 2 && $slices[1].key == 0) {
+      $flag = false;
       spin();
     }
 
@@ -102,7 +116,7 @@
       console.log("OldPick: " + oldpick.length, "Data length: " + data.length);
       if (oldpick.length == data.length) {
         console.log("done");
-        container.on("click", null);
+        // container.on("click", null);
         return;
       }
       var ps = 360 / data.length,
@@ -124,29 +138,37 @@
         .transition()
         .duration(3000)
         .attrTween("transform", rotTween)
-        .each("end", function () {
+        .each("end", async function () {
           // mark question as seen
           // d3.select(".slice:nth-child(" + (picked + 1) + ") path")
           //     .attr("fill", "#111");
           // populate question
 
-          d3.select("#question h1").text(data[picked].question);
-          oldrotation = rotation;
+          if (data[picked].id) {
+            const profile = await get(
+              `users/getimage/${data[picked].id || undefined}/${
+                data[picked].label || undefined
+              }/${streamerId || undefined}`
+            );
 
-          /* Get the result value from object "data" */
-          console.log(data[picked].value);
+            console.log({ profile });
+            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="300" height="300"/>`;
+            winnerWindowLabel.innerHTML = `<h1>${data[picked].label} wins the game</h1>`;
 
-          //clear all data inside the wheel
+            oldrotation = rotation;
+            /* Get the result value from object "data" */
+            // console.log(data[picked].value);
 
-          $chats = [];
-          $viewersArray = [];
-          $getChats = [];
-          for (const key in $viewers) {
-            delete $viewers[key];
+            const numberOfSlices = 1;
+
+            const colors = ["red", "blue", "pink", "green", "purple"];
+
+            for (let i = 0; i <= numberOfSlices; i++) {
+              $slices[i] = { key: i, label: "", id: "", color: colors[i] };
+            }
+            $currentIndex = -1;
+            $flag = true;
           }
-
-          /* Comment the below line for restrict spin to sngle time */
-          // container.on("click", spin);
         });
     }
     //make arrow
@@ -187,8 +209,8 @@
     }
 
     newChart.innerHTML = "";
+    console.log("Afterippp");
     newChart.appendChild(newNode);
-    console.log({ newNode });
   });
 </script>
 
@@ -197,7 +219,10 @@
 
     </div> -->
 </div>
-<div id="question"><h1 /></div>
+<div id="winnerContainer">
+  <div bind:this={winnerWindow} id="winnerImage" />
+  <div bind:this={winnerWindowLabel} id="question" />
+</div>
 
 <style>
   #chart {
@@ -207,7 +232,7 @@
     top: 0;
     left: 0;
   }
-  #question {
+  #winnerContainer {
     position: absolute;
     width: 400px;
     height: 500px;
@@ -221,8 +246,12 @@
     position: absolute;
     padding: 0;
     margin: 0;
-    top: 50%;
+    top: 40%;
     -webkit-transform: translate(0, -50%);
     transform: translate(0, -50%);
+  }
+  #winnerImage {
+    margin-left: 30px;
+    margin-top: 20px;
   }
 </style>

@@ -25,7 +25,7 @@ const twitchRegister = catchAsync(async (req, res) => {
   let userBody = req.body
   // const {id, display_name, email, profile_image_url} = req.twitchNewProfile[0];
 
-  const user = await userService.createTwitchUser(userBody);
+  const user = await userService.createTwitchUser(req.user);
   const twitchUser = await user.twitch.profile;
   const tokens = await tokenService.generateAuthTokens(user);
   console.log({user:user.twitch,tokens});

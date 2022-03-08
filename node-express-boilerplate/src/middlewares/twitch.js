@@ -3,9 +3,10 @@ const axios = require('axios');
 
 const getTwitchProfile = async (req, res, next) => {
   const { user } = req;
-  const { profile } = user;
-  const { login, id, accessToken} = profile
-  // console.log({ user });
+  const { twitch } = user;
+  const { profile, accessToken} = twitch
+  const { id, login} = profile
+  console.log({ user });
 
   try {
     const url = `https://api.twitch.tv/helix/users?login=${login}&id=${id}`
@@ -31,11 +32,9 @@ const getTwitchProfile = async (req, res, next) => {
 
     // console.log({ json });
 
-    req.body.twitch = {
-      twitchAccessToken : accessToken,
-      profile : data
-      // twitchProfile: data.
-    };
+    console.log({twitch:req.user.twitch})
+    req.user.twitch.profile = data
+
     // req.twitchNewProfile = data;
 // res.send({data})
     return next();

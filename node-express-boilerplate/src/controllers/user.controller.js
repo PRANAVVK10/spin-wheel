@@ -3,6 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
+const { getTwitchProfile } = require('../middlewares/twitch');
 
 const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -23,6 +24,22 @@ const getUser = catchAsync(async (req, res) => {
   }
   res.send(user);
 });
+
+
+const getOtherUserImage = catchAsync(async (req, res) => {
+  // req.user = req.params.user
+  // console.log({t:req.body.twitch})
+  const profile = req.user.twitch.profile
+  
+  if (!profile) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Image not found');
+  }
+
+  res.send(profile)
+  
+
+});
+
 
 const getTwitchUsername = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.params.userId);
@@ -46,6 +63,7 @@ module.exports = {
   createUser,
   getUsers,
   getUser,
+  getOtherUserImage,
   updateUser,
   deleteUser,
 };

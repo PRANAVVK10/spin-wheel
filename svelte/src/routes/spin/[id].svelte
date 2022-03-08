@@ -8,83 +8,85 @@
 </script>
 
 <script>
-  import SpinComponent from "$lib/spinComponent.svelte";
-  import { chatName, chats, getChats, viewersArray, viewers } from "$lib/store";
+  import SpinComponent from "$lib/SpinComponent.svelte";
+
+  import { slices, currentIndex, flag } from "$lib/store";
+
   import { onMount } from "svelte";
-  import Cookie from "cookie-universal";
+
   import { get } from "$lib/api";
-  const cookies = Cookie();
 
   //global variables
+  const numberOfSlices = 1;
+
+  const colors = ["red", "blue", "pink", "green", "purple"];
+
+  $currentIndex = -1;
 
   let d4;
 
   export let id;
-  function getRandomColor() {
-    var letters = "0123456789ABCDEF";
-    var color = "#";
-    for (var i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  }
+
+  let streamerId;
+
+  let currentId;
+  let currentName;
 
   onMount(async () => {
-    // let streamer = cookies.get("UserName");
+    for (let i = 0; i <= numberOfSlices; i++) {
+      $slices[i] = { key: i, label: "", id: "", color: colors[i] };
+    }
+
+    // get spin
     const spin = await get(`spin/get/${id}`);
-    console.log({ spin });
-    d4 = d3;
+
+    streamerId = spin.user;
+
+    console.log({ streamerId });
+
+    d4 = d3; //d3
+
     const client = new tmi.Client({
-      channels: [spin.username], //pranavvk10
+      channels: [spin.username], //streamerName
     });
 
     client.connect();
 
     client.on("message", (channel, tags, message, self) => {
-      let id = tags["user-id"];
-      let name = tags["display-name"];
+      currentId = tags["user-id"];
+      currentName = tags["display-name"];
 
-      $getChats.push({ id, name });
-
-      $getChats.map((item) => {
-        const { id, name } = item;
-
-        if ($viewers[id]) {
-          $viewers[id].times = $viewers[id].times + 1;
+      if ($flag == true) {
+        if ($currentIndex < numberOfSlices) {
+          console.log("currentIndex < numberOfSlices");
+          if (Object.values($slices).some(exists)) {
+            console.log("Duplicate Found");
+          } else {
+            $currentIndex++;
+            $slices[$currentIndex] = {
+              key: 0,
+              label: currentName,
+              id: currentId,
+              color: colors[$currentIndex],
+            };
+          }
         } else {
-          $viewers[id] = { name: name, times: 1, color: getRandomColor() };
+          $currentIndex = -1;
+          // Object.values($slices).forEach((item, i) => {
+          //   $slices[i] = { key: i, label: "", id: "", color: colors[i] };
+          // });
         }
-      });
-
-      $viewersArray = Object.values($viewers);
-      console.log({ $viewersArray });
+      }
     });
+
+    const exists = (element) => {
+      return element.id == currentId;
+    };
   });
-
-  $: if ($viewersArray.length < 3) {
-    $chats = [];
-    $viewersArray.map((v, i) => {
-      $chats = [
-        ...$chats,
-        {
-          label: v.name,
-          value: i + 1,
-          question: `${v.name} wins the game`,
-          color: v.color,
-        },
-      ];
-    });
-  }
-
-  $: if ($viewersArray.length == 0) {
-    $chats = [
-      { label: "", color: getRandomColor() },
-      { label: "", color: getRandomColor() },
-      { label: "", color: getRandomColor() },
-      { label: "", color: getRandomColor() },
-      { label: "", color: getRandomColor() },
-    ];
-  }
 </script>
 
-<SpinComponent />
+{#await $currentIndex then _}
+  {#await streamerId then _}
+    <SpinComponent {streamerId} />
+  {/await}
+{/await}
