@@ -19,6 +19,8 @@
   export let streamerId;
   let winnerWindow;
   let winnerWindowLabel;
+  let winnerContainer;
+  let profile;
 
   afterUpdate(() => {
     var padding = { top: 20, right: 40, bottom: 0, left: 0 },
@@ -146,14 +148,16 @@
           // populate question
 
           if (data[picked].id) {
-            const profile = await get(
+            profile = await get(
               `users/getimage/${data[picked].id || undefined}/${
                 data[picked].label || undefined
               }/${streamerId || undefined}`
             );
 
             console.log({ profile });
-            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="200" height="200"/>`;
+            winnerContainer.style.backgroundColor = "#f0f4ff";
+
+            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="150" height="150"/>`;
             winnerWindowLabel.innerHTML = `<h1>${data[picked].label} wins the game</h1>`;
 
             oldrotation = rotation;
@@ -164,7 +168,12 @@
               $slices[i] = { key: i, label: "", id: "", color: $colors[i] };
             }
             $currentIndex = -1;
-            $flag = true;
+            setTimeout(() => {
+              winnerWindow.innerHTML = "";
+              winnerWindowLabel.innerHTML = "";
+              winnerContainer.style.backgroundColor = "transparent";
+              $flag = true;
+            }, 3000);
           }
         });
     }
@@ -216,7 +225,8 @@
 
     </div> -->
 </div>
-<div id="winnerContainer">
+
+<div bind:this={winnerContainer} id="winnerContainer">
   <div bind:this={winnerWindow} id="winnerImage" />
   <div bind:this={winnerWindowLabel} id="question" />
 </div>
@@ -226,16 +236,36 @@
     position: absolute;
     width: 500px;
     height: 500px;
-    top: 0;
-    left: 0;
+    top: 20px;
+    left: 20px;
   }
+
   #winnerContainer {
     position: absolute;
-    width: 400px;
-    height: 500px;
-    top: 0;
-    left: 520px;
+    width: 460px;
+    height: 250px;
+    top: 150px;
+    left: 20px;
+    /* background: rgba(0, 0, 0, 0.3); */
+    border-radius: 20px;
+    /* animation: winnerShow 3s; */
   }
+
+  /* @keyframes winnerShow {
+    0% {
+      top: 300px;
+    }
+    25% {
+      top: 250px;
+    }
+    50% {
+      top: 200px;
+    }
+    100% {
+      top: 150px;
+    }
+  } */
+
   #question h1 {
     font-size: 50px;
     font-weight: bold;
@@ -246,9 +276,10 @@
     top: 40%;
     -webkit-transform: translate(0, -50%);
     transform: translate(0, -50%);
+    color: white;
   }
   #winnerImage {
-    margin-left: 100px;
+    margin-left: 150px;
     margin-top: 20px;
   }
 </style>
