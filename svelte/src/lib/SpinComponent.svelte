@@ -10,8 +10,7 @@
   } from "$lib/store";
 
   import { get } from "$lib/api";
-  import { append } from "svelte/internal";
-
+  import { attr } from "svelte/internal";
   $: data = Object.values($slices);
 
   //global variables
@@ -47,6 +46,25 @@
       .data([data])
       .attr("width", w + padding.left + padding.right)
       .attr("height", h + padding.top + padding.bottom);
+
+    var newSVG = svg
+      .append("defs")
+      .append("filter")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", "1")
+      .attr("height", "1")
+      .attr("id", "solid");
+
+    newSVG
+      .append("feFlood")
+      .attr("flood-color", "rgba(255,255,255,0.2)")
+      .attr("result", "bg");
+
+    var feMerge = newSVG.append("feMerge");
+
+    feMerge.append("feMergeNode").attr("in", "bg");
+    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
     var container = svg
       .append("g")
@@ -89,8 +107,10 @@
 
     // add text
 
-    arcs
+    var arcElement = arcs
       .append("text")
+      .attr("filter", "url(#solid)")
+
       .attr("transform", function (d) {
         d.innerRadius = 0;
         d.outerRadius = r;
@@ -104,17 +124,25 @@
         );
       })
       .attr("text-anchor", "end")
-      .attr("x", "-30")
-      .style({ fill: "black", "font-weight": "bold", "font-size": "16px" })
-      .text(function (d, i) {
-        return data[i].label ? data[i].label.substring(0, 15) + "..." : "";
+      .attr("x", "-10")
+      .attr("y", "6")
+      .style({
+        fill: "white",
+        "font-weight": "bold",
+
+        "font-size": "1.3rem",
+        // stroke: "white",
       });
+
+    arcElement.append("tspan").text(function (d, i) {
+      return data[i].label ? `⠀${data[i].label.substring(0, 13)}` + "...⠀" : "";
+    });
 
     // container.on("click", spin);
 
     // container.on("click", null);
 
-    if (data.length == 2 && $slices[1].key == 0) {
+    if (data.length == 10 && $slices[9].key == 0) {
       $flag = false;
       spin();
     }
@@ -165,7 +193,7 @@
             winnerContainer.style.opacity = ".9";
             winnerContainer.style.boxShadow = "10px 20px 100px rgba(0,0,0,1)";
 
-            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="250" height="250"/>`;
+            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width=${width} height=${height}/>`;
             winnerWindowLabel.innerHTML = `<h1>${data[picked].label} wins the game</h1>`;
             winnerContainer.style.fontFamily = "Bebas Neue";
             // winnerContainer.style.fontSize = "small";
@@ -256,11 +284,15 @@
 
 <div
   bind:this={winnerContainer}
-  class="absolute w-screen h-screen top-0 left-0 flex flex-col items-center justify-center"
+  class="absolute w-screen h-screen rounded-xl overflow-hidden"
   id="winnerContainer"
 >
-  <div bind:this={winnerWindowLabel} id="question" />
-  <div bind:this={winnerWindow} id="winnerImage" />
+  <div bind:this={winnerWindowLabel} id="question" class="" />
+  <div
+    bind:this={winnerWindow}
+    id="winnerImage"
+    class="flex justify-center items-center w-screen h-screen"
+  />
 </div>
 
 <style>
@@ -293,5 +325,6 @@
   /* #winnerImage {
     margin-left: 150px;
     margin-top: 20px;
+    
   } */
 </style>
