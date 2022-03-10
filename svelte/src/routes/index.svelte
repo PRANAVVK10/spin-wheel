@@ -9,7 +9,7 @@
   };
 </script>
 
-<div class="h-screen flex justify-between">
+<div class="h-screen flex justify-around">
   <!-- <input
     class="mb-10 h-10 rounded-md pl-2 shadow-md outline-none"
     type="text"
@@ -21,11 +21,11 @@
     placeholder="Password"
   /> -->
   <button
-    class=" rounded bg-blue-500 text-white p-3 shadow-lg w-60"
+    class=" rounded bg-blue-500 text-white p-3 shadow-lg w-60 h-20 mt-40 ml-44"
     on:click={signInHandler}>sign in with twitch</button
   >
   <button
-    class=" rounded bg-blue-500 text-white p-3 shadow-lg w-60"
+    class=" rounded bg-blue-500 text-white p-3 shadow-lg w-60 h-20 mt-40 mr-44"
     on:click={loginWithGoogle}>sign in with google</button
   >
 </div>

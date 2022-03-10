@@ -1,5 +1,5 @@
 <script>
-  import { afterUpdate } from "svelte";
+  import { afterUpdate, onMount } from "svelte";
 
   import {
     slices,
@@ -10,6 +10,7 @@
   } from "$lib/store";
 
   import { get } from "$lib/api";
+  import { append } from "svelte/internal";
 
   $: data = Object.values($slices);
 
@@ -22,10 +23,13 @@
   let winnerContainer;
   let profile;
 
+  let height;
+  let width;
+
   afterUpdate(() => {
-    var padding = { top: 20, right: 40, bottom: 0, left: 0 },
-      w = 500 - padding.left - padding.right,
-      h = 500 - padding.top - padding.bottom,
+    var padding = { top: 0, right: 0, bottom: 0, left: 0 },
+      w = width - padding.left - padding.right,
+      h = height - padding.top - padding.bottom,
       r = Math.min(w, h) / 2,
       rotation = 0,
       oldrotation = 0,
@@ -55,6 +59,7 @@
           (h / 2 + padding.top) +
           ")"
       );
+
     var vis = container.append("g");
 
     var pie = d3.layout
@@ -99,9 +104,10 @@
         );
       })
       .attr("text-anchor", "end")
-      .style({ fill: "", "font-weight": "bold", "font-size": "16px" })
+      .attr("x", "-30")
+      .style({ fill: "black", "font-weight": "bold", "font-size": "16px" })
       .text(function (d, i) {
-        return data[i].label;
+        return data[i].label ? data[i].label.substring(0, 15) + "..." : "";
       });
 
     // container.on("click", spin);
@@ -156,9 +162,13 @@
 
             console.log({ profile });
             winnerContainer.style.backgroundColor = "#f0f4ff";
+            winnerContainer.style.opacity = ".9";
+            winnerContainer.style.boxShadow = "10px 20px 100px rgba(0,0,0,1)";
 
-            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="150" height="150"/>`;
+            winnerWindow.innerHTML = `<img src="${profile.profile_image_url}" width="250" height="250"/>`;
             winnerWindowLabel.innerHTML = `<h1>${data[picked].label} wins the game</h1>`;
+            winnerContainer.style.fontFamily = "Bebas Neue";
+            // winnerContainer.style.fontSize = "small";
 
             oldrotation = rotation;
             /* Get the result value from object "data" */
@@ -172,6 +182,7 @@
               winnerWindow.innerHTML = "";
               winnerWindowLabel.innerHTML = "";
               winnerContainer.style.backgroundColor = "transparent";
+              winnerContainer.style.boxShadow = "10px 20px 100px rgba(0,0,0,0)";
               $flag = true;
             }, 3000);
           }
@@ -198,14 +209,27 @@
       .attr("cy", 0)
       .attr("r", 60)
       .style({ fill: "white", cursor: "pointer" });
+
+    //volcano logo
+    // container
+    //   .append("svg:image")
+    //   .attr("xlink:href", "https://volcano.live/Assets/volcano%20_logo.png")
+    //   .attr("x", "-28")
+    //   .attr("y", "-30");
+
     //spin text
+
     container
       .append("text")
       .attr("x", 0)
-      .attr("y", 15)
+      .attr("y", 13)
       .attr("text-anchor", "middle")
-      .text("")
-      .style({ "font-weight": "bold", "font-size": "40px" });
+      .text("volcano")
+      .style({
+        "font-weight": "bold",
+        "font-size": "30px",
+        "font-family": "Bebas Neue",
+      });
 
     function rotTween(to) {
       var i = d3.interpolate(oldrotation % 360, rotation);
@@ -220,66 +244,54 @@
   });
 </script>
 
-<div bind:this={newChart} id="chart">
+<!-- height and width -->
+
+<svelte:window bind:innerHeight={height} bind:innerWidth={width} />
+
+<div bind:this={newChart} id="chart" class="absolute w-screen h-screen">
   <!-- <div bind:this={toReplaceElement}>
 
     </div> -->
 </div>
 
-<div bind:this={winnerContainer} id="winnerContainer">
-  <div bind:this={winnerWindow} id="winnerImage" />
+<div
+  bind:this={winnerContainer}
+  class="absolute w-screen h-screen top-0 left-0 flex flex-col items-center justify-center"
+  id="winnerContainer"
+>
   <div bind:this={winnerWindowLabel} id="question" />
+  <div bind:this={winnerWindow} id="winnerImage" />
 </div>
 
 <style>
-  #chart {
+  /* #chart {
     position: absolute;
-    width: 500px;
-    height: 500px;
-    top: 20px;
-    left: 20px;
-  }
+    width: 100%;
+    height: 100%;
 
-  #winnerContainer {
-    position: absolute;
-    width: 460px;
-    height: 250px;
-    top: 150px;
-    left: 20px;
-    /* background: rgba(0, 0, 0, 0.3); */
-    border-radius: 20px;
-    /* animation: winnerShow 3s; */
-  }
-
-  /* @keyframes winnerShow {
-    0% {
-      top: 300px;
-    }
-    25% {
-      top: 250px;
-    }
-    50% {
-      top: 200px;
-    }
-    100% {
-      top: 150px;
-    }
   } */
 
-  #question h1 {
-    font-size: 50px;
+  /* #winnerContainer {
+    position: absolute;
+    width: 460px;
+    height: 300px;
+    top: 130px;
+    left: 20px;
+    border-radius: 20px;
+  } */
+
+  /* #question h1 {
+    font-size: 20px;
     font-weight: bold;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    position: absolute;
     padding: 0;
     margin: 0;
     top: 40%;
     -webkit-transform: translate(0, -50%);
     transform: translate(0, -50%);
-    color: white;
-  }
-  #winnerImage {
+  } */
+  /* #winnerImage {
     margin-left: 150px;
     margin-top: 20px;
-  }
+  } */
 </style>
